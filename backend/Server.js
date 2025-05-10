@@ -4,7 +4,7 @@ const cors = require("cors")
 const app = express();
 const router = require("./src/router/TodoRoutes");
 const AuthRouter = require("./src/router/AuthRoutes")
-const port = 4001; 
+const port = process.env.MONGO_URI || 4001; 
 
 
 app.use(express.urlencoded({ extended: true }));
