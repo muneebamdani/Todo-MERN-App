@@ -1,58 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_BASE from '../../api';
+const api = import.meta.env.VITE_API_BASE;
 
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
-  const [edit, setEdit] = useState("");
-  const [editid, setEditId] = useState(null);
 
   useEffect(() => {
-    GEtAllTodo()
+    getAllTodos();
   }, []);
 
-  const GEtAllTodo = async () => {
-    await axios.get(`${API_BASE}/GetAllTodo`)
-      .then(res => {
-        setTodos(res.data.data)
-      })
-      .catch((err) => {
-        console.log("Error fetching data", err);
-      })
-  }
+  const getAllTodos = async () => {
+    try {
+      const res = await axios.get(`${api}/GetAllTodo`);
+      setTodos(res.data.data); // Assuming response is structured as { data: [...] }
+    } catch (err) {
+      console.log("Error fetching data", err);
+    }
+  };
 
-  const Deletetodo = async (id) => {
-    await axios.delete(`${API_BASE}/DeleteTodo${id}`)
-      .then(res => {
-        alert("Todo Deleted Successfully")
-        GEtAllTodo()
-      })
-      .catch((err) => { console.log("Todo is not deleted", err) })
-  }
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete(`${api}/DeleteTodo/${id}`);
+      alert("Todo Deleted Successfully");
+      getAllTodos(); // Refresh list after delete
+    } catch (err) {
+      console.log("Todo is not deleted", err);
+    }
+  };
 
-  const UpdateTodo = async (id) => {
-   if (edit.trim() === "") {
+  const updateTodo = async (id, title) => {
+    if (title.trim() === "") {
       return alert("Please Enter a Task");
-   }
-    await axios.put(`${API_BASE}/UpdateTodo${id}`, {
-      title: edit
-    })
-    setEdit("")
-    setEditId(null)
-    GEtAllTodo()
-      .catch((err) => console.log("Error Updating Task",err))
-  }
+    }
 
-  const TaskComplete = async (id, complete) => {
+    try {
+      await axios.put(`${api}/UpdateTodo/${id}`, { title });
+      getAllTodos(); // Refresh list after update
+    } catch (err) {
+      console.log("Error Updating Task", err);
+    }
+  };
 
-
-    
-    await axios.patch(`${API_BASE}/UpdateTodo${id}`, {
-      completed: complete
-    })
-    GEtAllTodo()
-      .catch((err) => console.log("Error", err))
-  }
+  const taskComplete = async (id, complete) => {
+    try {
+      await axios.patch(`${api}/UpdateTodo/${id}`, { completed: complete });
+      getAllTodos(); // Refresh list after completion update
+    } catch (err) {
+      console.log("Error", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
@@ -60,15 +56,13 @@ const TodoList = () => {
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">📋 My Todo List</h1>
 
         {todos && todos.length > 0 ? (
-          todos.map(todo => (
+          todos.map((todo) => (
             <div key={todo._id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-              
-              {/* Checkbox & Task Title */}
               <div className="flex items-center gap-3 flex-1">
                 <input
                   type="checkbox"
                   checked={todo.completed}
-                  onChange={() => { TaskComplete(todo._id, !todo.completed) }}
+                  onChange={() => { taskComplete(todo._id, !todo.completed); }}
                   className="w-5 h-5 accent-green-600"
                 />
                 <p className={`text-lg break-all ${todo.completed ? 'line-through text-gray-400' : 'text-gray-800'}`}>
@@ -77,35 +71,17 @@ const TodoList = () => {
               </div>
 
               {/* Edit Input */}
-              {editid === todo._id && (
-                <input
-                  type="text"
-                  placeholder="Update Task"
-                  value={edit}
-                  onChange={(e) => setEdit(e.target.value)}
-                  className="border border-gray-300 px-4 py-2 rounded-md w-full md:w-1/2"
-                />
-              )}
-
-              {/* Buttons */}
               <div className="flex flex-wrap gap-2 justify-end">
                 <button
                   className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md"
-                  onClick={() => {
-                    if (editid === todo._id) {
-                      UpdateTodo(todo._id)
-                    } else {
-                      setEditId(todo._id)
-                      setEdit(todo.title)
-                    }
-                  }}
+                  onClick={() => updateTodo(todo._id, todo.title)}
                 >
-                  {editid === todo._id ? "Save" : "Update"}
+                  Update
                 </button>
 
                 <button
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-                  onClick={() => { Deletetodo(todo._id) }}
+                  onClick={() => deleteTodo(todo._id)}
                 >
                   Delete
                 </button>
@@ -121,4 +97,3 @@ const TodoList = () => {
 };
 
 export default TodoList;
-
