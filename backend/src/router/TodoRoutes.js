@@ -5,8 +5,8 @@ const { CreateTodo,getAlltodo,deleteTodo,updateTodo } = require("../Controllers/
 
 router.post("/Create-Todo", CreateTodo);
 router.get("/GetAllTodo", getAlltodo);
-router.delete("/DeleteTodo:id", deleteTodo);
-router.put("/UpdateTodo:id", updateTodo);
-router.patch("/UpdateTodo:id", updateTodo);
+router.delete("/DeleteTodo/:id", deleteTodo);
+router.put("/UpdateTodo/:id", updateTodo);
+router.patch("/UpdateTodo/:id", updateTodo);
 
 module.exports = router;

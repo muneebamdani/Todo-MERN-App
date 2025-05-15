@@ -5,22 +5,21 @@ const api = import.meta.env.VITE_API_BASE;
 
 const TodoForm = () => {
   const [title, setTitle] = useState("");
+  const [refreshFlag, setRefreshFlag] = useState(false); // trigger refresh
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page reload on form submission
+    e.preventDefault();
     if (title.trim() === "") {
       return alert("Please Enter A Task");
     }
 
     try {
-      // Post the new todo
       await axios.post(`${api}/Create-Todo`, {
         title,
         completed: false,
       });
-      setTitle(""); // Reset input field
-      // Trigger the update of the TodoList
-      window.location.reload(); // This forces the page to reload and fetch the updated list from the backend
+      setTitle("");
+      setRefreshFlag((prev) => !prev); // trigger TodoList to reload
     } catch (err) {
       console.log("Error adding todo", err);
     }
@@ -31,7 +30,6 @@ const TodoForm = () => {
       <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-6">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">📝 Todo App</h1>
 
-        {/* Form */}
         <form
           className="flex flex-col sm:flex-row gap-3 mb-6"
           onSubmit={handleSubmit}
@@ -51,11 +49,10 @@ const TodoForm = () => {
           </button>
         </form>
 
-        {/* Todo List */}
-        <TodoList />
+        <TodoList refreshFlag={refreshFlag} />
       </div>
     </div>
   );
 };
 
-export default TodoForm; // Ensure default export
+export default TodoForm;
